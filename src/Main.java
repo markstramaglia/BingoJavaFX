@@ -1,11 +1,14 @@
 import javafx.application.Application;  //abstract class used for JavaFX GUI's
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.PointLight;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Sphere;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;              //class for GUI window
 import javafx.scene.Scene;              //class for specific view in GUI window
@@ -24,6 +27,7 @@ public class Main extends Application implements EventHandler<ActionEvent>  { //
     private int width = 1200;
     private int height = 700;
     private String windowTitle = "Bingo";
+    private Circle bingoBallCircle;
     private Label bingoBallText;
 
     private BingoGame bingoGame = new BingoGame();
@@ -94,17 +98,23 @@ public class Main extends Application implements EventHandler<ActionEvent>  { //
     public Node buildLeft()
     {
         bingoBallText = new Label("");
-        bingoBallText.setFont(Font.font("Roboto", 75));
+        bingoBallText.setFont(Font.font("Roboto", 60));
         bingoBallText.setTextFill(Color.BLACK);
 
-        Circle bingoBallCircle = new Circle();
+        bingoBallCircle = new Circle();
         bingoBallCircle.setRadius(100.0f);
         bingoBallCircle.setFill(Color.WHITE);
         bingoBallCircle.setStroke(Color.BLACK);
-        bingoBallCircle.setStrokeWidth(5.0f);
+        bingoBallCircle.setStrokeWidth(3.0f);
+
+        Circle bingoBallInnerCircle = new Circle();
+        bingoBallInnerCircle.setRadius(80.0f);
+        bingoBallInnerCircle.setFill(Color.WHITE);
+        bingoBallInnerCircle.setStroke(Color.BLACK);
+        bingoBallInnerCircle.setStrokeWidth(3.0f);
 
         StackPane bingoBall = new StackPane();
-        bingoBall.getChildren().addAll(bingoBallCircle, bingoBallText);
+        bingoBall.getChildren().addAll(bingoBallCircle, bingoBallInnerCircle, bingoBallText);
 
         VBox layout = new VBox();
         layout.setAlignment(Pos.CENTER);
@@ -129,7 +139,27 @@ public class Main extends Application implements EventHandler<ActionEvent>  { //
             float squareSize = 55.0f;
 
             Rectangle shape = new Rectangle(squareSize, squareSize);
-            shape.setFill(Color.WHITE);
+            switch(bingoBallLetters[i])
+            {
+                case 'B':
+                    shape.setFill(Color.CYAN);
+                    break;
+                case 'I':
+                    shape.setFill(Color.RED);
+                    break;
+                case 'N':
+                    shape.setFill(Color.ORANGE);
+                    break;
+                case 'G':
+                    shape.setFill(Color.LIME);
+                    break;
+                case 'O':
+                    shape.setFill(Color.YELLOW);
+                    break;
+                default:
+                    shape.setFill(Color.WHITE);
+                    break;
+            }
             shape.setStroke(Color.BLACK);
             shape.setStrokeWidth(1.0f);
 
@@ -199,7 +229,10 @@ public class Main extends Application implements EventHandler<ActionEvent>  { //
         // Which button did you push???
         if(actionEvent.getSource() == btnNextBingoBall)
         {
-            bingoBallText.setText(bingoGame.nextBingoBall().toString());
+            BingoBall nextBall = bingoGame.nextBingoBall();
+            bingoBallText.setText(nextBall.toString());
+            bingoBallCircle.setFill(nextBall.getBingoBallColor());
+
             // Refresh Bingo Board Grid
             Node center = buildCenter();
             layout.setCenter(center);
