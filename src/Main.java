@@ -1,19 +1,15 @@
 import javafx.application.Application;  //abstract class used for JavaFX GUI's
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.PointLight;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Sphere;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;              //class for GUI window
 import javafx.scene.Scene;              //class for specific view in GUI window
-import javafx.scene.control.Label;      //class for label component
-import javafx.scene.control.Button;     //class for button component
 import javafx.event.EventHandler;       //interface for handling events
 import javafx.event.ActionEvent;        //class for type of event for action (like button or key pressed)
 import javafx.geometry.Pos;             //class for getting positions for alignment
@@ -35,7 +31,8 @@ public class Main extends Application implements EventHandler<ActionEvent>  { //
     /*** GUI COMPONENTS ***/
     private BorderPane layout;
     private Button btnNextBingoBall;
-    private Button btnNewGame;
+    private MenuItem newGame;
+    private MenuItem exit;
 
     /*** DRIVER main ***/
     public static void main(String[] args) {
@@ -75,6 +72,7 @@ public class Main extends Application implements EventHandler<ActionEvent>  { //
 
         //SETUP SCENE AND SHOW
         Scene primaryScene = new Scene(layout, width, height); //layout, dimensions of window
+        primaryScene.getStylesheets().add("/resources/styles.css");
         primaryStage.setScene(primaryScene);
         primaryStage.setTitle(windowTitle); //setting title of main window
         primaryStage.setResizable(allowWindowResize); //set resizable attribute to window
@@ -83,20 +81,11 @@ public class Main extends Application implements EventHandler<ActionEvent>  { //
 
     public Node buildTop()
     {
-        HBox layout = new HBox();
+        VBox container = new VBox();
 
-        Label lblTopTitle = new Label("Bingo");
-        lblTopTitle.setFont(Font.font("Roboto", 72));
-        lblTopTitle.setTextFill(Color.WHITE);
+        AnchorPane layout = new AnchorPane();
 
-        layout.setAlignment(Pos.CENTER);
-        layout.getChildren().add(lblTopTitle);
-
-        return layout;
-    }
-
-    public Node buildLeft()
-    {
+        // BEGIN BingoBall
         bingoBallText = new Label("");
         bingoBallText.setFont(Font.font("Roboto", 60));
         bingoBallText.setTextFill(Color.BLACK);
@@ -115,10 +104,34 @@ public class Main extends Application implements EventHandler<ActionEvent>  { //
 
         StackPane bingoBall = new StackPane();
         bingoBall.getChildren().addAll(bingoBallCircle, bingoBallInnerCircle, bingoBallText);
+        // END BingoBall
 
+        btnNextBingoBall = new Button("Next Bingo Ball");
+        btnNextBingoBall.setPrefSize(300.0, 100.0);
+        btnNextBingoBall.getStyleClass().add("btn-nextBall");
+        btnNextBingoBall.setOnAction(this);
+
+        // Anchor label to the top left corner
+        AnchorPane.setTopAnchor(bingoBall, 10.0);
+        AnchorPane.setLeftAnchor(bingoBall, 10.0);
+
+        // Anchor button to the top right corner
+        AnchorPane.setTopAnchor(btnNextBingoBall, 50.0);
+        AnchorPane.setRightAnchor(btnNextBingoBall, 215.0);
+
+        layout.setPadding(new Insets(25, 25, 25, 25));
+        layout.getChildren().addAll(bingoBall, btnNextBingoBall);
+
+        container.getChildren().addAll(buildMenuBar(), layout);
+
+        return container;
+    }
+
+    public Node buildLeft()
+    {
         VBox layout = new VBox();
         layout.setAlignment(Pos.CENTER);
-        layout.getChildren().add(bingoBall);
+        //layout.getChildren().add(bingoBall);
 
         return layout;
     }
@@ -196,7 +209,7 @@ public class Main extends Application implements EventHandler<ActionEvent>  { //
         }
 
         VBox layout = new VBox();
-        layout.setAlignment(Pos.CENTER);
+        layout.setAlignment(Pos.TOP_LEFT);
         layout.getChildren().add(grid);
 
         return layout;
@@ -207,15 +220,32 @@ public class Main extends Application implements EventHandler<ActionEvent>  { //
         HBox layout = new HBox();
         layout.setAlignment(Pos.CENTER);
 
-        btnNextBingoBall = new Button("Next Bingo Ball");
-        btnNextBingoBall.setOnAction(this);
 
-        btnNewGame = new Button("New Game");
-        btnNewGame.setOnAction(this);
 
-        layout.getChildren().addAll(btnNextBingoBall, btnNewGame);
+        //layout.getChildren().addAll(btnNextBingoBall);
 
         return layout;
+    }
+
+    public MenuBar buildMenuBar()
+    {
+        MenuBar menuBar = new MenuBar();
+
+        // File
+        Menu file = new Menu("File");
+
+        // File >> New Game
+        newGame = new MenuItem("New Game");
+        newGame.setOnAction(this);
+
+        // File >> Exit
+        exit = new MenuItem("Exit");
+        exit.setOnAction(this);
+
+
+        file.getItems().addAll(newGame, exit);
+        menuBar.getMenus().addAll(file);
+        return menuBar;
     }
 
     /*** OVERRIDDEN EventHandler METHODS ***/
@@ -238,13 +268,18 @@ public class Main extends Application implements EventHandler<ActionEvent>  { //
             layout.setCenter(center);
         }
 
-        if(actionEvent.getSource() == btnNewGame)
+        if(actionEvent.getSource() == newGame)
         {
             bingoBallText.setText("");
             bingoGame.resetGame();
             // Refresh Bingo Board Grid
             Node center = buildCenter();
             layout.setCenter(center);
+        }
+
+        if(actionEvent.getSource() == exit)
+        {
+            System.exit(0);
         }
     }
 }
